@@ -17,7 +17,7 @@ namespace LearnDependantTypes
 
     public struct Struct : IAstTopLevel
     {
-        // deal with later
+        //todo deal with later
     }
 
     public struct FnDeclTopLevel : IAstTopLevel
@@ -77,19 +77,19 @@ namespace LearnDependantTypes
         }
     }
 
-    public struct VarDecl : IAstExpr
+    public struct VarDecl : IAstStatement
     {
         public Identifier Identifier;
+        public Identifier? TypeAnnotation;
         public IAstExpr Expr;
 
-        public VarDecl(Identifier identifier, IAstExpr expr)
+        public VarDecl(Identifier identifier, Identifier? typeAnnotation, IAstExpr expr)
         {
             Identifier = identifier;
+            TypeAnnotation = typeAnnotation;
             Expr = expr;
         }
     }
-
-    // ifs
 
     public struct IfElse : IAstExpr
     {
@@ -185,13 +185,13 @@ namespace LearnDependantTypes
 
     public struct FuncCall : IAstExpr
     {
-        public Identifier Name;
+        public IAstExpr Callee;
 
-        public List<(Token, Token?)> Arguments;
+        public List<IAstExpr> Arguments;
 
-        public FuncCall(Identifier name, List<(Token, Token?)> arguments)
+        public FuncCall(IAstExpr callee, List<IAstExpr> arguments)
         {
-            Name = name;
+            Callee = callee;
             Arguments = arguments;
         }
     }

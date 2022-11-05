@@ -17,14 +17,14 @@ namespace LearnDependantTypes
             _ps = ps;
         }
         
-        private List<Token> ParseList(TokenType openType, TokenType delimType, TokenType closedType)
+        private List<T> ParseList<T>(TokenType openType, Func<T> parseContained, TokenType closedType)
         {
             if (!_ps.Match(openType, out Token? openTok))
             {
                 throw new ParserError($"Expected a {openType} to start list.", _ps.Current);
             }
 
-            List<Token> ret = new List<Token>();
+            List<T> ret = new List<T>();
             
             while (!_ps.Match(closedType))
             {
@@ -35,11 +35,11 @@ namespace LearnDependantTypes
                 }
                 else
                 {
-                    ret.Add(_ps.Current);
+                    ret.Add(parseContained());
                     _ps.Next();
-                    if (!_ps.Match(delimType, out Token? errorDelim) && !_ps.Expect(closedType))
+                    if (!_ps.Match(TokenType.Comma, out Token? errorDelim) && !_ps.Expect(closedType))
                     {
-                        throw new ParserError($"Found {_ps.Current} but expected {delimType} as list delimiter",
+                        throw new ParserError($"Found {_ps.Current} but expected ',' as list delimiter",
                             _ps.Current);
                     }
                 }
@@ -164,7 +164,28 @@ namespace LearnDependantTypes
             }
             else if (_ps.Match(TokenType.Var, out Token? varStart))
             {
-                throw new NotImplementedException();
+                if (!_ps.Match(TokenType.Identifier, out Token? nameTok))
+                {
+                    throw new ParserError($"Expected identifier after {TokenType.Var} but found {_ps.Current.Type}", _ps.Current);
+                }
+
+                Token? tAnnTok = null;
+                
+                // Handle optional type annotation
+                if (_ps.Match(TokenType.Colon))
+                {
+                    if (!_ps.Match(TokenType.Identifier, out tAnnTok))
+                    {
+                        throw new ParserError($"Expected identifier after {TokenType.Colon} for type annotation but found {_ps.Current.Type}", _ps.Current);
+                    }
+                }
+                
+                if (!_ps.Match(TokenType.Equals))
+                {
+                    throw new ParserError($"Expected {TokenType.Equals} after variable decl at ", varStart.Value);
+                }
+
+                return new VarDecl(new Identifier(nameTok.Value), tAnnTok.HasValue? new Identifier(tAnnTok.Value): null, ParseExpr());
             }
             else
             {
@@ -174,7 +195,38 @@ namespace LearnDependantTypes
 
         private IAstExpr ParseExpr()
         {
-            return ParseIf();
+            return ParseVarSet();
+        }
+
+        private IAstExpr ParseVarSet()
+        {
+            var expr = ParseFunctionCall();
+            if (_ps.Match(TokenType.Equals))
+            {
+                var right = ParseVarSet();
+                if (expr is VarGet vg)
+                {
+                    expr = new VarSet(vg.Name, right);
+                }
+            }
+
+            return expr;
+        }
+        
+        private IAstExpr ParseFunctionCall()
+        {
+            var maybeFunction = ParseIf();
+
+            if (maybeFunction is VarGet vg)
+            {
+                if (_ps.Expect(TokenType.LParen))
+                {
+                    List<IAstExpr> argList = ParseList(TokenType.LParen, ParseExpr, TokenType.RParen);
+                    maybeFunction = new FuncCall(maybeFunction, argList);
+                }
+            }
+            
+            return maybeFunction;
         }
 
         private IAstExpr ParseIf()
@@ -245,7 +297,7 @@ namespace LearnDependantTypes
         {
             if (_ps.Match(TokenType.Identifier, out Token? identTok))
             {
-                return new Identifier(identTok.Value);
+                return new VarGet(new Identifier(identTok.Value));
             }
             else if (_ps.Match(TokenType.Integer, out Token? intTok))
             {

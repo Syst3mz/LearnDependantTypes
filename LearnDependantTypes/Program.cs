@@ -29,7 +29,10 @@ namespace LearnDependantTypes
                                         "}";
 
         public static string DemoProg = "fn main() -> bool {" +
-                                        "   return if 3 == 4 {true} else {false};" +
+                                        "   var x = 20" +
+                                        "   x = 14" +
+                                        "   var y = func()" +
+                                        "   return if x == 4 {true} else {false};" +
                                         "}";
         
         static void Main(string[] args)
