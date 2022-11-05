@@ -20,7 +20,7 @@ namespace LearnDependantTypes
                                         "}" +
                                         "fn main() -> Void {" +
                                         "   var x = 0;" +
-                                        "   x = x + 1" +
+                                        "   x = x + 1;" +
                                         "   if x == 20 {" +
                                         "       print(123);" +
                                         "   } else {" +
@@ -29,7 +29,7 @@ namespace LearnDependantTypes
                                         "}";
 
         public static string DemoProg = "fn main() -> bool {" +
-                                        "   return if 3 == 4 {true} else {false}" +
+                                        "   return if 3 == 4 {true} else {false};" +
                                         "}";
         
         static void Main(string[] args)

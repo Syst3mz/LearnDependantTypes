@@ -36,6 +36,7 @@ namespace LearnDependantTypes
             {")", TokenType.RParen},
             {",", TokenType.Comma},
             {";", TokenType.SemiColon},
+            {":", TokenType.Colon},
             {"print", TokenType.Print},
         };
 

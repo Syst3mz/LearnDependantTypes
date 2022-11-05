@@ -44,16 +44,26 @@ namespace LearnDependantTypes
     {
 
         public Identifier Name;
-        public List<(Token, Token?)> ParametersAndType;
+        public List<(Identifier, Identifier)> ParametersAndType;
         public Block FunctionBody;
         public Identifier RetType;
 
-        public FnDecl(Identifier name, List<(Token, Token?)> parameters, Block functionBody, Identifier retType)
+        public FnDecl(Identifier name, List<(Identifier, Identifier)> parametersAndType, Block functionBody, Identifier retType)
         {
             Name = name;
-            Parameters = parameters;
+            ParametersAndType = parametersAndType;
             FunctionBody = functionBody;
             RetType = retType;
+        }
+    }
+
+    public struct Return : IAstStatement
+    {
+        public IAstExpr Expr;
+
+        public Return(IAstExpr expr)
+        {
+            Expr = expr;
         }
     }
 

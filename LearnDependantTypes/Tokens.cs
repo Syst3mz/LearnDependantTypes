@@ -21,11 +21,13 @@
         Arrow,
         EqualsEquals,
         BangEquals,
+        Colon,
         Eof,
 
         // non static tokens
         Integer,
         Boolean,
         Identifier,
+        
     }
 }

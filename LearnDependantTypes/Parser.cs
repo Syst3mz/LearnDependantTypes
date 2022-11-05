@@ -37,7 +37,7 @@ namespace LearnDependantTypes
                 {
                     ret.Add(_ps.Current);
                     _ps.Next();
-                    if (!_ps.Match(delimType, out Token? errorDelim))
+                    if (!_ps.Match(delimType, out Token? errorDelim) && !_ps.Expect(closedType))
                     {
                         throw new ParserError($"Found {_ps.Current} but expected {delimType} as list delimiter",
                             _ps.Current);
@@ -73,9 +73,40 @@ namespace LearnDependantTypes
                 {
                     throw new ParserError($"Expected open paren after function name.", _ps.Current);
                 }
+                
+                
+                // parse argument list
+                if (!_ps.Match(TokenType.LParen, out Token? argOpener))
+                {
+                    throw new ParserError($"Expected a {TokenType.LParen} to start parameter list.", _ps.Current);
+                }
 
-                List<Token> args = ParseList(TokenType.LParen, TokenType.Comma, TokenType.RParen);
+                List<(Identifier, Identifier)> paramsList = new List<(Identifier, Identifier)>();
+                while (!_ps.Match(TokenType.RParen))
+                {
+                    if (!_ps.Match(TokenType.Identifier, out Token? paramName))
+                    {
+                        throw new ParserError($"Expected a {TokenType.Identifier} for parameter name.", _ps.Current);
+                    }
 
+                    if (!_ps.Match(TokenType.Colon))
+                    {
+                        throw new ParserError($"Expected a {TokenType.Colon} for parameter type annotation.", _ps.Current);
+                    }
+
+                    if (!_ps.Match(TokenType.Identifier, out Token? annotation))
+                    {
+                        throw new ParserError($"Expected a {TokenType.Identifier} as parameter type annotation.", _ps.Current);
+                    }
+                    
+                    paramsList.Add((new Identifier(paramName.Value), new Identifier(annotation.Value)));
+                    
+                    if (!_ps.Match(TokenType.Comma) && !_ps.Expect(TokenType.RParen))
+                    {
+                        throw new ParserError($"Expected a {TokenType.Comma} to delimit the list", _ps.Current);
+                    }
+                }
+                
                 if (!_ps.Match(TokenType.Arrow))
                 {
                     throw new ParserError($"Expected arrow and return type, but found {_ps.Current.Type}", _ps.Current);
@@ -85,10 +116,9 @@ namespace LearnDependantTypes
                 {
                     throw new ParserError($"Expected return type at {_ps.Current}", _ps.Current);
                 }
+                
 
-                List<(Token, Token?)> argsTuples = new List<(Token, Token?)>();
-
-                return new FnDeclTopLevel(new FnDecl(fnName, args, ParseBlock(), retType));
+                return new FnDeclTopLevel(new FnDecl(fnName, paramsList, ParseBlock(), new Identifier(retType.Value)));
             }
             else if (_ps.Match(TokenType.Struct))
             {
@@ -123,12 +153,128 @@ namespace LearnDependantTypes
 
         private IAstStatement ParseStatement()
         {
-            throw new NotImplementedException();
+            if (_ps.Match(TokenType.Return, out Token? retStart))
+            {
+                var expr = ParseExpr();
+                if (!_ps.Match(TokenType.SemiColon))
+                {
+                    throw new ParserError($"Expected {TokenType.SemiColon} after return statement.", _ps.Current);
+                }
+                return new Return(expr);
+            }
+            else if (_ps.Match(TokenType.Var, out Token? varStart))
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                return new ExprStatement(ParseExpr());
+            }
         }
 
         private IAstExpr ParseExpr()
         {
-            throw new NotImplementedException();
+            return ParseIf();
+        }
+
+        private IAstExpr ParseIf()
+        {
+            if (_ps.Match(TokenType.If, out Token? ifStartTok))
+            {
+                var conditional = ParseBopPrece1();
+                var block = ParseBlock();
+                if (_ps.Match(TokenType.Else, out Token? elseTok))
+                {
+                    var elseBlock = ParseBlock();
+                    return new IfElse(ifStartTok.Value, conditional, block, elseTok.Value, elseBlock);
+                }
+
+                return new IfElse(ifStartTok.Value, conditional, block);
+            }
+            else
+            {
+                return ParseBopPrece1();
+            }
+        }
+
+        private IAstExpr ParseBopPrece1()
+        {
+            IAstExpr left = ParseBopPrece2();
+            while (true)
+            {
+                if (_ps.Match(TokenType.EqualsEquals, out Token? eqTok))
+                {
+                    left = new BinaryOperation(eqTok.Value, left, ParseAtom(), BinaryOperation.Bop.Equals);
+                }
+                else if (_ps.Match(TokenType.BangEquals, out Token? bangTok))
+                {
+                    left = new BinaryOperation(bangTok.Value, left, ParseAtom(), BinaryOperation.Bop.NotEquals);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return left;
+        }
+
+        private IAstExpr ParseBopPrece2()
+        {
+            IAstExpr left = ParseAtom();
+            while (true)
+            {
+                if (_ps.Match(TokenType.Plus, out Token? plusTok))
+                {
+                    left = new BinaryOperation(plusTok.Value, left, ParseAtom(), BinaryOperation.Bop.Plus);
+                }
+                else if (_ps.Match(TokenType.Minus, out Token? minusTok))
+                {
+                    left = new BinaryOperation(minusTok.Value, left, ParseAtom(), BinaryOperation.Bop.Minus);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return left;
+        }
+
+        private IAstExpr ParseAtom()
+        {
+            if (_ps.Match(TokenType.Identifier, out Token? identTok))
+            {
+                return new Identifier(identTok.Value);
+            }
+            else if (_ps.Match(TokenType.Integer, out Token? intTok))
+            {
+                return new Integer(intTok.Value, int.Parse(intTok.Value.Lexeme));
+            }
+            else if (_ps.Match(TokenType.Boolean, out Token? boolTok))
+            {
+                return new Boolean(boolTok.Value, bool.Parse(boolTok.Value.Lexeme));
+            }
+            else if (_ps.Match(TokenType.LParen, out Token? parenStart))
+            {
+                var inner = ParseExpr();
+                if (!_ps.Match(TokenType.RParen))
+                {
+                    throw new ParserError($"Unclosed parenthesis starting at", parenStart.Value);
+                }
+
+                return inner;
+            }
+            else if (_ps.Match(TokenType.Minus, out Token? minusTok))
+            {
+                return new UnaryOperation(minusTok.Value, ParseExpr(), UnaryOperation.Uop.MakeNegative);
+            }
+            else if (_ps.Match(TokenType.Bang, out Token? bangTok))
+            {
+                return new UnaryOperation(bangTok.Value, ParseExpr(), UnaryOperation.Uop.Negate);
+            }
+
+            throw new ParserError($"Unexpect {_ps.Current} in token stream at ", _ps.Current);
         }
     }
 }
