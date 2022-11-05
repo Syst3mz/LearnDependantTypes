@@ -35,6 +35,7 @@ namespace LearnDependantTypes
         static void Main(string[] args)
         {
             var lexed = new Lexer(DemoProg).Lex();
+            var parsed = new Parser(lexed).Parse();
             return;
         }
     }

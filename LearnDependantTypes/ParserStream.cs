@@ -6,7 +6,8 @@ namespace LearnDependantTypes
     {
         private List<Token> _toParse;
         private int _idx = 0;
-        private Token _current => _toParse[_idx];
+        public bool Done => _idx >= _toParse.Count;
+        public Token Current => _idx<_toParse.Count? _toParse[_idx]: new Token(TokenType.Eof, "", -1, -1);
 
         public ParserStream(List<Token> toParse)
         {
@@ -21,9 +22,12 @@ namespace LearnDependantTypes
         public Token? Peek(int by)
         {
             int at = _idx + by;
-            if (at < 0 || at >= _toParse.Count)
+            if (at < 0)
             {
                 return null;
+            } else if (at >= _toParse.Count)
+            {
+                return new Token(TokenType.Eof, "", -1, -1);
             }
 
             return _toParse[at];
@@ -31,7 +35,7 @@ namespace LearnDependantTypes
         
         public bool Expect(TokenType t)
         {
-            if (_current.Type == t)
+            if (Current.Type == t)
             {
                 return true;
             }
@@ -43,7 +47,7 @@ namespace LearnDependantTypes
         {
             if (Expect(t))
             {
-                tok = _current;
+                tok = Current;
                 return true;
             }
 
@@ -66,7 +70,7 @@ namespace LearnDependantTypes
         {
             if (Expect(t))
             {
-                tok = _current;
+                tok = Current;
                 Next();
                 return true;
             }

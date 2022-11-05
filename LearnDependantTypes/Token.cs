@@ -35,5 +35,10 @@
             LinePos = linePos;
             CharPos = charPos;
         }
+
+        public override string ToString()
+        {
+            return $"{LinePos}:{CharPos}";
+        }
     }
 }

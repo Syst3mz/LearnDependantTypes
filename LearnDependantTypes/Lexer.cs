@@ -21,6 +21,7 @@ namespace LearnDependantTypes
             {"fn", TokenType.Fn},
             {"var", TokenType.Var},
             {"+", TokenType.Plus},
+            {"->", TokenType.Arrow},
             {"-", TokenType.Minus},
             {"==", TokenType.EqualsEquals},
             {"!=", TokenType.BangEquals},
@@ -36,7 +37,6 @@ namespace LearnDependantTypes
             {",", TokenType.Comma},
             {";", TokenType.SemiColon},
             {"print", TokenType.Print},
-            {"->", TokenType.Arrow}
         };
 
         public List<Token> Lex()
@@ -78,7 +78,7 @@ namespace LearnDependantTypes
                         // handle ids
                         if (char.IsLetter(cur) || cur == '_')
                         {
-                            string idName = "";
+                            string idName = cur + "";
                             idx++;
                             while (idx < _toLex.Length)
                             {
@@ -118,7 +118,6 @@ namespace LearnDependantTypes
                 }
                 
             }
-            ret.Add(new Token(TokenType.Eof, "", linePos, charPos));
             return ret;
         }
     }

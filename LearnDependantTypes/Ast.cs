@@ -42,17 +42,18 @@ namespace LearnDependantTypes
     
     public struct FnDecl : IAstStatement
     {
-        public Token NameToken;
-        public string Name => NameToken.Lexeme;
 
-        public List<(Token, Token)> Arguments;
+        public Identifier Name;
+        public List<(Token, Token?)> ParametersAndType;
         public Block FunctionBody;
+        public Identifier RetType;
 
-        public FnDecl(Token nameToken, List<(Token, Token)> arguments, Block functionBody)
+        public FnDecl(Identifier name, List<(Token, Token?)> parameters, Block functionBody, Identifier retType)
         {
-            NameToken = nameToken;
-            Arguments = arguments;
+            Name = name;
+            Parameters = parameters;
             FunctionBody = functionBody;
+            RetType = retType;
         }
     }
 
@@ -68,40 +69,34 @@ namespace LearnDependantTypes
 
     public struct VarDecl : IAstExpr
     {
-        public Token NameToken;
-        public string Name => NameToken.Lexeme;
+        public Identifier Identifier;
         public IAstExpr Expr;
 
-        public VarDecl(Token nameToken, IAstExpr expr)
+        public VarDecl(Identifier identifier, IAstExpr expr)
         {
-            NameToken = nameToken;
+            Identifier = identifier;
             Expr = expr;
         }
     }
 
     // ifs
 
-    public struct If : IAstExpr
-    {
-        public Token IfToken;
-        public IAstExpr Conditional;
-        public Block TrueBlock;
-
-        public If(Token ifToken, IAstExpr conditional, Block trueBlock)
-        {
-            IfToken = ifToken;
-            Conditional = conditional;
-            TrueBlock = trueBlock;
-        }
-    }
-    
     public struct IfElse : IAstExpr
     {
         public Token IfToken;
         public IAstExpr Conditional;
         public Block TrueBlock;
-        public Token ElseToken;
-        public Block FalseBLock;
+        public Token? ElseToken;
+        public Block? FalseBLock;
+
+        public IfElse(Token ifToken, IAstExpr conditional, Block trueBlock) : this()
+        {
+            IfToken = ifToken;
+            Conditional = conditional;
+            TrueBlock = trueBlock;
+            ElseToken = null;
+            FalseBLock = null;
+        }
 
         public IfElse(Token ifToken, IAstExpr conditional, Block trueBlock, Token elseToken, Block falseBLock)
         {
@@ -156,6 +151,41 @@ namespace LearnDependantTypes
         }
     }
 
+    public struct VarGet : IAstExpr
+    {
+        public Identifier Name;
+
+        public VarGet(Identifier name)
+        {
+            Name = name;
+        }
+    }
+    
+    public struct VarSet : IAstExpr
+    {
+        public Identifier Name;
+        public IAstExpr Expr;
+
+        public VarSet(Identifier name, IAstExpr expr)
+        {
+            Name = name;
+            Expr = expr;
+        }
+    }
+
+    public struct FuncCall : IAstExpr
+    {
+        public Identifier Name;
+
+        public List<(Token, Token?)> Arguments;
+
+        public FuncCall(Identifier name, List<(Token, Token?)> arguments)
+        {
+            Name = name;
+            Arguments = arguments;
+        }
+    }
+
     // simple AST nodes
     
     public struct Integer : IAstExpr
@@ -175,7 +205,7 @@ namespace LearnDependantTypes
         public Token Token;
         public string Value => Token.Lexeme;
 
-        public Identifier(Token token, long value)
+        public Identifier(Token token)
         {
             Token = token;
         }
