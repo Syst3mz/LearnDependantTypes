@@ -1,0 +1,16 @@
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\bin\Debug\net5.0\LearnDependantTypes.exe
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\bin\Debug\net5.0\LearnDependantTypes.deps.json
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\bin\Debug\net5.0\LearnDependantTypes.runtimeconfig.json
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\bin\Debug\net5.0\LearnDependantTypes.runtimeconfig.dev.json
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\bin\Debug\net5.0\LearnDependantTypes.dll
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\bin\Debug\net5.0\ref\LearnDependantTypes.dll
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\bin\Debug\net5.0\LearnDependantTypes.pdb
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\LearnDependantTypes.csproj.AssemblyReference.cache
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\LearnDependantTypes.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\LearnDependantTypes.AssemblyInfoInputs.cache
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\LearnDependantTypes.AssemblyInfo.cs
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\LearnDependantTypes.csproj.CoreCompileInputs.cache
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\LearnDependantTypes.dll
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\ref\LearnDependantTypes.dll
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\LearnDependantTypes.pdb
+C:\dev\Csharp\LearnDependantTypes\LearnDependantTypes\obj\Debug\net5.0\LearnDependantTypes.genruntimeconfig.cache
