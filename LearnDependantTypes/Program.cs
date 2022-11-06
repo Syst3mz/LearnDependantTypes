@@ -39,6 +39,11 @@ namespace LearnDependantTypes
         {
             var lexed = new Lexer(DemoProg).Lex();
             var parsed = new Parser(lexed).Parse();
+            var prettyPrinter = new PrettyPrintVisitor();
+            foreach (var level in parsed)
+            {
+                Console.WriteLine(prettyPrinter.VisitTopLevel(level));
+            }
             return;
         }
     }

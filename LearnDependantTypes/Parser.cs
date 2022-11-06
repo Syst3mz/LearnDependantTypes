@@ -301,7 +301,7 @@ namespace LearnDependantTypes
             }
             else if (_ps.Match(TokenType.Integer, out Token? intTok))
             {
-                return new Integer(intTok.Value, int.Parse(intTok.Value.Lexeme));
+                return new Integer(intTok.Value, long.Parse(intTok.Value.Lexeme));
             }
             else if (_ps.Match(TokenType.Boolean, out Token? boolTok))
             {
