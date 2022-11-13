@@ -151,6 +151,14 @@ namespace LearnDependantTypes
             return new Block(statements);
         }
 
+        private void ErrOnNoSemi()
+        {
+            if (!_ps.Match(TokenType.SemiColon))
+            {
+                throw new ParserError($"Expected {TokenType.SemiColon} but got {_ps.Current}", _ps.Current);
+            }
+        }
+
         private IAstStatement ParseStatement()
         {
             if (_ps.Match(TokenType.Return, out Token? retStart))
@@ -185,7 +193,9 @@ namespace LearnDependantTypes
                     throw new ParserError($"Expected {TokenType.Equals} after variable decl at ", varStart.Value);
                 }
 
-                return new VarDecl(new Identifier(nameTok.Value), tAnnTok.HasValue? new Identifier(tAnnTok.Value): null, ParseExpr());
+                var l = ParseExpr();
+                ErrOnNoSemi();
+                return new VarDecl(new Identifier(nameTok.Value), tAnnTok.HasValue? new Identifier(tAnnTok.Value): null, l);
             }
             else
             {
@@ -208,6 +218,8 @@ namespace LearnDependantTypes
                 {
                     expr = new VarSet(vg.Name, right);
                 }
+                
+                ErrOnNoSemi();
             }
 
             return expr;
@@ -326,7 +338,7 @@ namespace LearnDependantTypes
                 return new UnaryOperation(bangTok.Value, ParseExpr(), UnaryOperation.Uop.Negate);
             }
 
-            throw new ParserError($"Unexpect {_ps.Current} in token stream at ", _ps.Current);
+            throw new ParserError($"Unexpected {_ps.Current} in token stream at ", _ps.Current);
         }
     }
 }

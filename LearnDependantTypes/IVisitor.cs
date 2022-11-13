@@ -72,9 +72,9 @@ namespace LearnDependantTypes
     
     public static class ExprVisitorExtension
     {
-        public static T VisitExpr<T>(this IExprVisitor<T> visitor, IAstExpr statement) 
+        public static T VisitExpr<T>(this IExprVisitor<T> visitor, IAstExpr expr) 
         {
-            switch (statement)
+            switch (expr)
             {
                 case BinaryOperation binaryOperation:
                     return visitor.VisitBinaryOperation(binaryOperation);

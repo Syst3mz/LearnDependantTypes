@@ -5,7 +5,7 @@ namespace LearnDependantTypes
 {
     public class InterpreterVisitor : IExprVisitor<IInterpreterValue>, ITopLevelVisitor<IInterpreterValue>, IStatementVisitor<IInterpreterValue>
     {
-        private InterpreterEnvironment _ie = new InterpreterEnvironment();
+        private InterpreterEnvironment<IInterpreterValue> _ie = new InterpreterEnvironment<IInterpreterValue>();
         public IInterpreterValue VisitBinaryOperation(BinaryOperation bop)
         {
 
@@ -47,13 +47,30 @@ namespace LearnDependantTypes
 
         public IInterpreterValue VisitFuncCall(FuncCall fnCall)
         {
-            InterpreterEnvironment prior = _ie;
-            var def = prior.Get(fnCall.Callee)
-            InterpreterEnvironment func = new InterpreterEnvironment(_ie);
-            foreach (var expr in fnCall.Arguments)
+            InterpreterEnvironment<IInterpreterValue> prior = _ie;
+            InterpreterEnvironment<IInterpreterValue> func = new InterpreterEnvironment<IInterpreterValue>(_ie);
+
+            var evalCall = this.VisitExpr(fnCall.Callee);
+            if (evalCall is FunctionValue fv)
             {
-                func.Bind();
+                for (int i = 0; i < fv.Arguments.Count; i++)
+                {
+                    func.Bind(fv.Arguments[i], this.VisitExpr(fnCall.Arguments[i]));
+                }
+
+                _ie = func;
+                try
+                {
+                    var ret = this.VisitStatement(fv.FuncBlock);
+                }
+                catch (ReturnPseudoException re)
+                {
+                    return re.RetVal;
+                }
+                _ie = prior;
+                return new UnitValue();
             }
+            return new UnitValue();
         }
 
         public IInterpreterValue VisitIdentifier(Identifier id)
@@ -118,8 +135,8 @@ namespace LearnDependantTypes
 
         public IInterpreterValue VisitBlock(Block block)
         {
-            InterpreterEnvironment prior = _ie;
-            _ie = new InterpreterEnvironment(_ie);
+            InterpreterEnvironment<IInterpreterValue> prior = _ie;
+            _ie = new InterpreterEnvironment<IInterpreterValue>(_ie);
             IInterpreterValue lastExpr = new UnitValue();
             foreach (var statement in block.Statements)
             {
@@ -143,18 +160,52 @@ namespace LearnDependantTypes
             {
                 argNames.Add(tuple.Item1.Value);
             }
-            _ie.Bind(funcDecl.Name.Value, new FunctionValue(funcDecl.Name.Value, funcDecl.FunctionBody, argNames));
-            return new UnitValue();
+
+            var fn = new FunctionValue(funcDecl.Name.Value, funcDecl.FunctionBody, argNames);
+            _ie.Bind(funcDecl.Name.Value, fn);
+            return fn;
+        }
+
+        public class ReturnPseudoException : Exception
+        {
+            public IInterpreterValue RetVal;
+
+            public ReturnPseudoException(IInterpreterValue retVal)
+            {
+                RetVal = retVal;
+            }
         }
 
         public IInterpreterValue VisitReturn(Return ret)
         {
-            return this.VisitExpr(ret.Expr);
+            throw new ReturnPseudoException(this.VisitExpr(ret.Expr));
         }
 
         public IInterpreterValue VisitVarDecl(VarDecl decl)
         {
             _ie.Bind(decl.Identifier.Value, this.VisitExpr(decl.Expr));
+            return new UnitValue();
+        }
+
+        public IInterpreterValue Interpret(List<IAstTopLevel> tops)
+        {
+            foreach (var top in tops)
+            {
+                this.VisitTopLevel(top);
+            }
+
+            foreach (var top in tops)
+            {
+                if (top is FnDeclTopLevel dc)
+                {
+                    if (dc.Function.Name.Value.Equals("main"))
+                    {
+                        var main = (FunctionValue)_ie.Get("main");
+                        return this.VisitExpr(new FuncCall(new VarGet(new Identifier(new Token(TokenType.Identifier, "main", 0, 0))), new List<IAstExpr>()));
+                    }
+                }
+            }
+
             return new UnitValue();
         }
     }
@@ -171,6 +222,11 @@ namespace LearnDependantTypes
         {
             Value = value;
         }
+        
+        public override string ToString()
+        {
+            return Value + "";
+        }
     }
     
     public class IntegerValue : IInterpreterValue 
@@ -180,6 +236,11 @@ namespace LearnDependantTypes
         public IntegerValue(long value)
         {
             Value = value;
+        }
+        
+        public override string ToString()
+        {
+            return Value + "";
         }
     }
 
@@ -195,9 +256,18 @@ namespace LearnDependantTypes
             FuncBlock = funcBlock;
             Arguments = arguments;
         }
+        
+        public override string ToString()
+        {
+            return $"{Name}";
+        }
     }
 
     public struct UnitValue : IInterpreterValue
     {
+        public override string ToString()
+        {
+            return "Unit";
+        }
     }
 }

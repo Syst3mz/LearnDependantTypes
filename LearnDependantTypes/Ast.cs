@@ -2,6 +2,11 @@
 
 namespace LearnDependantTypes
 {
+    public interface IAstNode
+    {
+        public Location Location { get; set; }
+    }
+
     public interface IAstTopLevel
     {
         

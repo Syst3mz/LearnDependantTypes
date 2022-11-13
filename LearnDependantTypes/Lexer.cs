@@ -48,15 +48,15 @@ namespace LearnDependantTypes
             while (idx < _toLex.Length)
             {
                 char cur = _toLex[idx];
-                if (char.IsWhiteSpace(cur))
-                {
-                    charPos++;
-                    idx++;
-                }
-                else if (cur == '\n')
+                if (cur == '\n')
                 {
                     charPos = 1;
                     linePos++;
+                    idx++;
+                }
+                else if (char.IsWhiteSpace(cur))
+                {
+                    charPos++;
                     idx++;
                 }
                 else

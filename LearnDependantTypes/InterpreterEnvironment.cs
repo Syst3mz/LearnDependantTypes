@@ -3,22 +3,22 @@ using System.Collections.Generic;
 
 namespace LearnDependantTypes
 {
-    public class InterpreterEnvironment
+    public class InterpreterEnvironment<T>
     {
-        private InterpreterEnvironment _contained;
-        private Dictionary<string, IInterpreterValue> _map = new Dictionary<string, IInterpreterValue>();
+        private InterpreterEnvironment<T> _contained;
+        private Dictionary<string, T> _map = new Dictionary<string, T>();
 
         public InterpreterEnvironment()
         {
             _contained = null;
         }
 
-        public InterpreterEnvironment(InterpreterEnvironment contained)
+        public InterpreterEnvironment(InterpreterEnvironment<T> contained)
         {
             _contained = contained;
         }
 
-        public void Bind(string x, IInterpreterValue to)
+        public void Bind(string x, T to)
         {
             if (_map.ContainsKey(x))
             {
@@ -30,7 +30,7 @@ namespace LearnDependantTypes
             }
         }
         
-        public void Set(string x, IInterpreterValue to)
+        public void Set(string x, T to)
         {
             if (_map.ContainsKey(x))
             {
@@ -49,7 +49,7 @@ namespace LearnDependantTypes
             }
         }
         
-        public IInterpreterValue Get(string x)
+        public T Get(string x)
         {
             if (_map.ContainsKey(x))
             {

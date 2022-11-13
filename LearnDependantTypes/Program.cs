@@ -28,11 +28,14 @@ namespace LearnDependantTypes
                                         "   }" +
                                         "}";
 
-        public static string DemoProg = "fn main() -> bool {" +
-                                        "   var x = 20" +
-                                        "   x = 14" +
-                                        "   var y = func()" +
-                                        "   return if x == 4 {true} else {false};" +
+        public static string DemoProg = "fn func() -> int {\n" +
+                                        "   return 0;\n" +
+                                        "}\n" +
+                                        "fn main() -> bool {\n" +
+                                        "   var x = 20;\n" +
+                                        "   x = 14;\n" +
+                                        "   var y = func();\n" +
+                                        "   return if x == 4 {true} else {false};\n" +
                                         "}";
         
         static void Main(string[] args)
@@ -44,6 +47,10 @@ namespace LearnDependantTypes
             {
                 Console.WriteLine(prettyPrinter.VisitTopLevel(level));
             }
+
+            InterpreterVisitor interpreter = new InterpreterVisitor();
+            Console.WriteLine(interpreter.Interpret(parsed));
+            
             return;
         }
     }
