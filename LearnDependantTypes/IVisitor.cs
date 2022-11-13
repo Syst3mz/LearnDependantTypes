@@ -62,7 +62,6 @@ namespace LearnDependantTypes
         public T VisitBinaryOperation(BinaryOperation bop);
         public T VisitBoolean(Boolean boolean);
         public T VisitFuncCall(FuncCall fnCall);
-        public T VisitIdentifier(Identifier id);
         public T VisitIfElse(IfElse ie);
         public T VisitInteger(Integer i);
         public T VisitUnaryOperation(UnaryOperation uop);
@@ -82,8 +81,6 @@ namespace LearnDependantTypes
                     return visitor.VisitBoolean(boolean);
                 case FuncCall funcCall:
                     return visitor.VisitFuncCall(funcCall);
-                case Identifier identifier:
-                    return visitor.VisitIdentifier(identifier);
                 case IfElse ifElse:
                     return visitor.VisitIfElse(ifElse);
                 case Integer integer:

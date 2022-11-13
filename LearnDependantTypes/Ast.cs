@@ -4,30 +4,32 @@ namespace LearnDependantTypes
 {
     public interface IAstNode
     {
-        public Location Location { get; set; }
+        public Location Location { get; }
     }
 
-    public interface IAstTopLevel
+    public interface IAstTopLevel : IAstNode
     {
         
     }
     
-    public interface IAstStatement
+    public interface IAstStatement : IAstNode
     {
     }
 
-    public interface IAstExpr
+    public interface IAstExpr : IAstNode
     {
     }
 
     public struct Struct : IAstTopLevel
     {
         //todo deal with later
+        public Location Location { get; set; }
     }
 
     public struct FnDeclTopLevel : IAstTopLevel
     {
         public FnDecl Function;
+        public Location Location => Function.Location;
 
         public FnDeclTopLevel(FnDecl function)
         {
@@ -37,6 +39,7 @@ namespace LearnDependantTypes
     
     public struct Block : IAstStatement
     {
+        public Location Location => Statements[0].Location;
         public List<IAstStatement> Statements;
 
         public Block(List<IAstStatement> statements)
@@ -47,24 +50,26 @@ namespace LearnDependantTypes
     
     public struct FnDecl : IAstStatement
     {
-
-        public Identifier Name;
-        public List<(Identifier, Identifier)> ParametersAndType;
+        public Location Location { get; set; }
+        public string Name;
+        public List<(string, string)> ParametersAndType;
         public Block FunctionBody;
-        public Identifier RetType;
+        public string RetType;
 
-        public FnDecl(Identifier name, List<(Identifier, Identifier)> parametersAndType, Block functionBody, Identifier retType)
+        public FnDecl(string name, List<(string, string)> parametersAndType, Block functionBody, string retType, Location location)
         {
             Name = name;
             ParametersAndType = parametersAndType;
             FunctionBody = functionBody;
             RetType = retType;
+            Location = location;
         }
     }
 
     public struct Return : IAstStatement
     {
         public IAstExpr Expr;
+        public Location Location => Expr.Location;
 
         public Return(IAstExpr expr)
         {
@@ -75,6 +80,7 @@ namespace LearnDependantTypes
     public struct ExprStatement : IAstStatement
     {
         public IAstExpr Expr;
+        public Location Location => Expr.Location;
 
         public ExprStatement(IAstExpr expr)
         {
@@ -84,42 +90,42 @@ namespace LearnDependantTypes
 
     public struct VarDecl : IAstStatement
     {
-        public Identifier Identifier;
-        public Identifier? TypeAnnotation;
+        public Location Location { get; set; }
+        public string Identifier;
+        public string? TypeAnnotation;
         public IAstExpr Expr;
 
-        public VarDecl(Identifier identifier, Identifier? typeAnnotation, IAstExpr expr)
+        public VarDecl(string identifier, string typeAnnotation, IAstExpr expr, Location location)
         {
             Identifier = identifier;
             TypeAnnotation = typeAnnotation;
             Expr = expr;
+            Location = location;
         }
     }
 
     public struct IfElse : IAstExpr
     {
-        public Token IfToken;
         public IAstExpr Conditional;
         public Block TrueBlock;
         public Token? ElseToken;
         public Block? FalseBLock;
+        public Location Location { get; set; }
 
-        public IfElse(Token ifToken, IAstExpr conditional, Block trueBlock) : this()
+        public IfElse(IAstExpr conditional, Block trueBlock, Location location) : this()
         {
-            IfToken = ifToken;
             Conditional = conditional;
             TrueBlock = trueBlock;
-            ElseToken = null;
-            FalseBLock = null;
+            Location = location;
         }
 
-        public IfElse(Token ifToken, IAstExpr conditional, Block trueBlock, Token elseToken, Block falseBLock)
+        public IfElse(IAstExpr conditional, Block trueBlock, Token? elseToken, Block? falseBLock, Location location)
         {
-            IfToken = ifToken;
             Conditional = conditional;
             TrueBlock = trueBlock;
             ElseToken = elseToken;
             FalseBLock = falseBLock;
+            Location = location;
         }
     }
 
@@ -130,16 +136,15 @@ namespace LearnDependantTypes
             Negate,
             MakeNegative
         }
-
-        public Token Token;
+        public Location Location { get; set; }
         public IAstExpr Expr;
         public Uop Op;
 
-        public UnaryOperation(Token token, IAstExpr expr, Uop op)
+        public UnaryOperation(IAstExpr expr, Uop op, Location location)
         {
-            Token = token;
             Expr = expr;
             Op = op;
+            Location = location;
         }
     }
 
@@ -152,52 +157,56 @@ namespace LearnDependantTypes
             Equals,
             NotEquals,
         }
-
-        public Token Token;
+        public Location Location { get; set; }
         public IAstExpr Lhs, Rhs;
         public Bop Op;
 
-        public BinaryOperation(Token token, IAstExpr lhs, IAstExpr rhs, Bop op)
+        public BinaryOperation(IAstExpr lhs, IAstExpr rhs, Bop op, Location location)
         {
-            Token = token;
             Lhs = lhs;
             Rhs = rhs;
             Op = op;
+            Location = location;
         }
     }
 
     public struct VarGet : IAstExpr
     {
-        public Identifier Name;
+        public string Name;
+        public Location Location { get; set; }
 
-        public VarGet(Identifier name)
+        public VarGet(string name, Location location)
         {
             Name = name;
+            Location = location;
         }
     }
     
     public struct VarSet : IAstExpr
     {
-        public Identifier Name;
+        public string Name;
         public IAstExpr Expr;
+        public Location Location { get; set; }
 
-        public VarSet(Identifier name, IAstExpr expr)
+        public VarSet(string name, IAstExpr expr, Location location)
         {
             Name = name;
             Expr = expr;
+            Location = location;
         }
     }
 
     public struct FuncCall : IAstExpr
     {
         public IAstExpr Callee;
-
         public List<IAstExpr> Arguments;
+        public Location Location { get; set; }
 
-        public FuncCall(IAstExpr callee, List<IAstExpr> arguments)
+        public FuncCall(IAstExpr callee, List<IAstExpr> arguments, Location location)
         {
             Callee = callee;
             Arguments = arguments;
+            Location = location;
         }
     }
 
@@ -205,35 +214,24 @@ namespace LearnDependantTypes
     
     public struct Integer : IAstExpr
     {
-        public Token Token;
+        public Location Location { get; set; }
         public long Value;
 
-        public Integer(Token token, long value)
+        public Integer(Location loc, long value)
         {
-            Token = token;
+            Location = loc;
             Value = value;
-        }
-    }
-    
-    public struct Identifier : IAstExpr
-    {
-        public Token Token;
-        public string Value => Token.Lexeme;
-
-        public Identifier(Token token)
-        {
-            Token = token;
         }
     }
 
     public struct Boolean : IAstExpr
     {
-        public Token Token;
+        public Location Location { get; set; }
         public bool Value;
 
-        public Boolean(Token token, bool value)
+        public Boolean(Location loc, bool value)
         {
-            Token = token;
+            Location = loc;
             Value = value;
         }
     }

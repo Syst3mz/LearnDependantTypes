@@ -73,11 +73,6 @@ namespace LearnDependantTypes
             return new UnitValue();
         }
 
-        public IInterpreterValue VisitIdentifier(Identifier id)
-        {
-            throw new Exception("There should not be a random identifier but there is");
-        }
-
         public IInterpreterValue VisitIfElse(IfElse ie)
         {
             var conditional = (BooleanValue) this.VisitExpr(ie.Conditional);
@@ -113,13 +108,13 @@ namespace LearnDependantTypes
 
         public IInterpreterValue VisitVarGet(VarGet vg)
         {
-            return _ie.Get(vg.Name.Value);
+            return _ie.Get(vg.Name);
         }
 
         public IInterpreterValue VisitVarSet(VarSet vs)
         {
             var e = this.VisitExpr(vs.Expr);
-            _ie.Set(vs.Name.Value, e);
+            _ie.Set(vs.Name, e);
             return e;
         }
 
@@ -158,11 +153,11 @@ namespace LearnDependantTypes
             List<string> argNames = new List<string>();
             foreach (var tuple in funcDecl.ParametersAndType)
             {
-                argNames.Add(tuple.Item1.Value);
+                argNames.Add(tuple.Item1);
             }
 
-            var fn = new FunctionValue(funcDecl.Name.Value, funcDecl.FunctionBody, argNames);
-            _ie.Bind(funcDecl.Name.Value, fn);
+            var fn = new FunctionValue(funcDecl.Name, funcDecl.FunctionBody, argNames);
+            _ie.Bind(funcDecl.Name, fn);
             return fn;
         }
 
@@ -183,7 +178,7 @@ namespace LearnDependantTypes
 
         public IInterpreterValue VisitVarDecl(VarDecl decl)
         {
-            _ie.Bind(decl.Identifier.Value, this.VisitExpr(decl.Expr));
+            _ie.Bind(decl.Identifier, this.VisitExpr(decl.Expr));
             return new UnitValue();
         }
 
@@ -198,10 +193,11 @@ namespace LearnDependantTypes
             {
                 if (top is FnDeclTopLevel dc)
                 {
-                    if (dc.Function.Name.Value.Equals("main"))
+                    if (dc.Function.Name.Equals("main"))
                     {
                         var main = (FunctionValue)_ie.Get("main");
-                        return this.VisitExpr(new FuncCall(new VarGet(new Identifier(new Token(TokenType.Identifier, "main", 0, 0))), new List<IAstExpr>()));
+                        return this.VisitExpr(new FuncCall(new VarGet("main", dc.Location), new List<IAstExpr>(),
+                            dc.Location));
                     }
                 }
             }

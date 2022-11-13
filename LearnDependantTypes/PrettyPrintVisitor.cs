@@ -8,25 +8,27 @@ namespace LearnDependantTypes
         {
             return $"{with}{input.Replace("\n", "\n" + with)}";
         }
-        
+
+        private static Dictionary<BinaryOperation.Bop, string> _lt = new Dictionary<BinaryOperation.Bop, string>()
+        {
+            {BinaryOperation.Bop.Equals, "=="},
+            {BinaryOperation.Bop.NotEquals, "!="},
+            {BinaryOperation.Bop.Plus, "+="},
+            {BinaryOperation.Bop.Minus, "-="},
+        };
         public string VisitBinaryOperation(BinaryOperation bop)
         {
-            return $"({this.VisitExpr(bop.Lhs)} {bop.Token.Lexeme} {this.VisitExpr(bop.Rhs)})";
+            return $"({this.VisitExpr(bop.Lhs)} {_lt[bop.Op]} {this.VisitExpr(bop.Rhs)})";
         }
 
         public string VisitBoolean(Boolean boolean)
         {
-            return boolean.Token.Lexeme;
+            return boolean.Value + "";
         }
 
         public string VisitFuncCall(FuncCall fnCall)
         {
             return $"{this.VisitExpr(fnCall.Callee)}({string.Join(", ", fnCall.Arguments)})";
-        }
-
-        public string VisitIdentifier(Identifier id)
-        {
-            return $"{id.Value}";
         }
 
         public string VisitIfElse(IfElse ie)
@@ -37,7 +39,7 @@ namespace LearnDependantTypes
 
         public string VisitInteger(Integer i)
         {
-            return i.Token.Lexeme;
+            return i.Value + "";
         }
 
         public string VisitUnaryOperation(UnaryOperation uop)
@@ -47,12 +49,12 @@ namespace LearnDependantTypes
 
         public string VisitVarGet(VarGet vg)
         {
-            return vg.Name.Value;
+            return vg.Name;
         }
 
         public string VisitVarSet(VarSet vs)
         {
-            return $"{vs.Name.Value} = {this.VisitExpr(vs.Expr)}";
+            return $"{vs.Name} = {this.VisitExpr(vs.Expr)}";
         }
 
         public string VisitStruct(Struct s)
@@ -88,7 +90,7 @@ namespace LearnDependantTypes
                 args += $"{tuple.Item1}:{tuple.Item2}, ";
             }
             
-            return $"fn {funcDecl.Name.Value}({args}) -> {funcDecl.RetType.Value} {this.VisitStatement(funcDecl.FunctionBody)}";
+            return $"fn {funcDecl.Name}({args}) -> {funcDecl.RetType} {this.VisitStatement(funcDecl.FunctionBody)}";
         }
 
         public string VisitReturn(Return ret)
@@ -98,7 +100,7 @@ namespace LearnDependantTypes
 
         public string VisitVarDecl(VarDecl decl)
         {
-            return $"var {decl.Identifier.Value}" + (decl.TypeAnnotation.HasValue ? $":{decl.TypeAnnotation.Value.Value}":"") + $" = {this.VisitExpr(decl.Expr)}";
+            return $"var {decl.Identifier}" + decl.TypeAnnotation + $" = {this.VisitExpr(decl.Expr)}";
         }
     }
 }

@@ -17,11 +17,6 @@
             throw new System.NotImplementedException();
         }
 
-        public IType VisitIdentifier(Identifier id)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public IType VisitIfElse(IfElse ie)
         {
             throw new System.NotImplementedException();

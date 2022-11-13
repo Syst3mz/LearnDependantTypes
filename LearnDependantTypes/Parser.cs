@@ -68,7 +68,7 @@ namespace LearnDependantTypes
                     throw new ParserError($"Expected identifier token after \"fn\"", _ps.Current);
                 }
 
-                Identifier fnName = new Identifier(fnNameTok.Value);
+                string fnName = fnNameTok.Value.Lexeme;
                 if (!_ps.Expect(TokenType.LParen, out Token? argListOpen))
                 {
                     throw new ParserError($"Expected open paren after function name.", _ps.Current);
@@ -81,7 +81,7 @@ namespace LearnDependantTypes
                     throw new ParserError($"Expected a {TokenType.LParen} to start parameter list.", _ps.Current);
                 }
 
-                List<(Identifier, Identifier)> paramsList = new List<(Identifier, Identifier)>();
+                List<(string, string)> paramsList = new List<(string, string)>();
                 while (!_ps.Match(TokenType.RParen))
                 {
                     if (!_ps.Match(TokenType.Identifier, out Token? paramName))
@@ -99,7 +99,7 @@ namespace LearnDependantTypes
                         throw new ParserError($"Expected a {TokenType.Identifier} as parameter type annotation.", _ps.Current);
                     }
                     
-                    paramsList.Add((new Identifier(paramName.Value), new Identifier(annotation.Value)));
+                    paramsList.Add((paramName.Value.Lexeme, annotation.Value.Lexeme));
                     
                     if (!_ps.Match(TokenType.Comma) && !_ps.Expect(TokenType.RParen))
                     {
@@ -118,7 +118,7 @@ namespace LearnDependantTypes
                 }
                 
 
-                return new FnDeclTopLevel(new FnDecl(fnName, paramsList, ParseBlock(), new Identifier(retType.Value)));
+                return new FnDeclTopLevel(new FnDecl(fnName, paramsList, ParseBlock(), retType.Value.Lexeme, fnTok.Value.Location));
             }
             else if (_ps.Match(TokenType.Struct))
             {
@@ -195,7 +195,7 @@ namespace LearnDependantTypes
 
                 var l = ParseExpr();
                 ErrOnNoSemi();
-                return new VarDecl(new Identifier(nameTok.Value), tAnnTok.HasValue? new Identifier(tAnnTok.Value): null, l);
+                return new VarDecl(nameTok.Value.Lexeme, tAnnTok.HasValue? tAnnTok.Value.Lexeme: null, l, varStart.Value.Location);
             }
             else
             {
@@ -216,7 +216,7 @@ namespace LearnDependantTypes
                 var right = ParseVarSet();
                 if (expr is VarGet vg)
                 {
-                    expr = new VarSet(vg.Name, right);
+                    expr = new VarSet(vg.Name, right, vg.Location);
                 }
                 
                 ErrOnNoSemi();
@@ -234,7 +234,7 @@ namespace LearnDependantTypes
                 if (_ps.Expect(TokenType.LParen))
                 {
                     List<IAstExpr> argList = ParseList(TokenType.LParen, ParseExpr, TokenType.RParen);
-                    maybeFunction = new FuncCall(maybeFunction, argList);
+                    maybeFunction = new FuncCall(maybeFunction, argList, vg.Location);
                 }
             }
             
@@ -250,10 +250,10 @@ namespace LearnDependantTypes
                 if (_ps.Match(TokenType.Else, out Token? elseTok))
                 {
                     var elseBlock = ParseBlock();
-                    return new IfElse(ifStartTok.Value, conditional, block, elseTok.Value, elseBlock);
+                    return new IfElse(conditional, block, elseTok.Value, elseBlock, ifStartTok.Value.Location);
                 }
 
-                return new IfElse(ifStartTok.Value, conditional, block);
+                return new IfElse(conditional, block, ifStartTok.Value.Location);
             }
             else
             {
@@ -268,11 +268,11 @@ namespace LearnDependantTypes
             {
                 if (_ps.Match(TokenType.EqualsEquals, out Token? eqTok))
                 {
-                    left = new BinaryOperation(eqTok.Value, left, ParseAtom(), BinaryOperation.Bop.Equals);
+                    left = new BinaryOperation(left, ParseAtom(), BinaryOperation.Bop.Equals, eqTok.Value.Location);
                 }
                 else if (_ps.Match(TokenType.BangEquals, out Token? bangTok))
                 {
-                    left = new BinaryOperation(bangTok.Value, left, ParseAtom(), BinaryOperation.Bop.NotEquals);
+                    left = new BinaryOperation(left, ParseAtom(), BinaryOperation.Bop.NotEquals, bangTok.Value.Location);
                 }
                 else
                 {
@@ -290,11 +290,11 @@ namespace LearnDependantTypes
             {
                 if (_ps.Match(TokenType.Plus, out Token? plusTok))
                 {
-                    left = new BinaryOperation(plusTok.Value, left, ParseAtom(), BinaryOperation.Bop.Plus);
+                    left = new BinaryOperation(left, ParseAtom(), BinaryOperation.Bop.Plus, plusTok.Value.Location);
                 }
                 else if (_ps.Match(TokenType.Minus, out Token? minusTok))
                 {
-                    left = new BinaryOperation(minusTok.Value, left, ParseAtom(), BinaryOperation.Bop.Minus);
+                    left = new BinaryOperation(left, ParseAtom(), BinaryOperation.Bop.Minus, minusTok.Value.Location);
                 }
                 else
                 {
@@ -309,15 +309,15 @@ namespace LearnDependantTypes
         {
             if (_ps.Match(TokenType.Identifier, out Token? identTok))
             {
-                return new VarGet(new Identifier(identTok.Value));
+                return new VarGet(identTok.Value.Lexeme, identTok.Value.Location);
             }
             else if (_ps.Match(TokenType.Integer, out Token? intTok))
             {
-                return new Integer(intTok.Value, long.Parse(intTok.Value.Lexeme));
+                return new Integer(intTok.Value.Location, long.Parse(intTok.Value.Lexeme));
             }
             else if (_ps.Match(TokenType.Boolean, out Token? boolTok))
             {
-                return new Boolean(boolTok.Value, bool.Parse(boolTok.Value.Lexeme));
+                return new Boolean(boolTok.Value.Location, bool.Parse(boolTok.Value.Lexeme));
             }
             else if (_ps.Match(TokenType.LParen, out Token? parenStart))
             {
@@ -331,11 +331,11 @@ namespace LearnDependantTypes
             }
             else if (_ps.Match(TokenType.Minus, out Token? minusTok))
             {
-                return new UnaryOperation(minusTok.Value, ParseExpr(), UnaryOperation.Uop.MakeNegative);
+                return new UnaryOperation(ParseExpr(), UnaryOperation.Uop.MakeNegative, minusTok.Value.Location);
             }
             else if (_ps.Match(TokenType.Bang, out Token? bangTok))
             {
-                return new UnaryOperation(bangTok.Value, ParseExpr(), UnaryOperation.Uop.Negate);
+                return new UnaryOperation(ParseExpr(), UnaryOperation.Uop.Negate, bangTok.Value.Location);
             }
 
             throw new ParserError($"Unexpected {_ps.Current} in token stream at ", _ps.Current);
