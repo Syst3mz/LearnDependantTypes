@@ -1,15 +1,20 @@
-﻿namespace LearnDependantTypes
+﻿using System;
+
+namespace LearnDependantTypes.Visitors.TypeChecker
 {
     public class TypeCheckVisitor : IExprVisitor<IType>, IStatementVisitor<IType>, ITopLevelVisitor<IType>
     {
         public IType VisitBinaryOperation(BinaryOperation bop)
         {
-            throw new System.NotImplementedException();
+            if (bop.Op == BinaryOperation.Bop.Equals || bop.Op == BinaryOperation.Bop.NotEquals)
+            {
+                return new TBool();
+            }
         }
 
         public IType VisitBoolean(Boolean boolean)
         {
-            throw new System.NotImplementedException();
+            return new TBool();
         }
 
         public IType VisitFuncCall(FuncCall fnCall)
@@ -24,7 +29,7 @@
 
         public IType VisitInteger(Integer i)
         {
-            throw new System.NotImplementedException();
+            return new TInt();
         }
 
         public IType VisitUnaryOperation(UnaryOperation uop)
@@ -59,7 +64,7 @@
 
         public IType VisitReturn(Return ret)
         {
-            throw new System.NotImplementedException();
+            return this.VisitExpr(ret.Expr);
         }
 
         public IType VisitVarDecl(VarDecl decl)
@@ -74,7 +79,7 @@
 
         public IType FnDeclTopLevel(FnDeclTopLevel s)
         {
-            throw new System.NotImplementedException();
+            return this.VisitStatement(s.Function);
         }
     }
 }

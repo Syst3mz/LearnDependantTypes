@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using LearnDependantTypes.Lexing;
 
-namespace LearnDependantTypes
+namespace LearnDependantTypes.Parsing
 {
     public class ParserStream
     {

@@ -1,4 +1,4 @@
-﻿namespace LearnDependantTypes
+﻿namespace LearnDependantTypes.Lexing
 {
     public enum TokenType
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace LearnDependantTypes
+namespace LearnDependantTypes.Visitors
 {
     public class PrettyPrintVisitor : IExprVisitor<string>, ITopLevelVisitor<string>, IStatementVisitor<string>
     {

@@ -1,6 +1,7 @@
 ﻿using System;
+using LearnDependantTypes.Lexing;
 
-namespace LearnDependantTypes
+namespace LearnDependantTypes.Parsing
 {
     public class ParserError : Exception
     {

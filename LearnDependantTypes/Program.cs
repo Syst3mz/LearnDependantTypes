@@ -1,4 +1,7 @@
 ﻿using System;
+using LearnDependantTypes.Lexing;
+using LearnDependantTypes.Visitors;
+using LearnDependantTypes.Visitors.Interpreter;
 
 namespace LearnDependantTypes
 {

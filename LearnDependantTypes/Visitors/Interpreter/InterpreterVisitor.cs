@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LearnDependantTypes
+namespace LearnDependantTypes.Visitors.Interpreter
 {
     public class InterpreterVisitor : IExprVisitor<IInterpreterValue>, ITopLevelVisitor<IInterpreterValue>, IStatementVisitor<IInterpreterValue>
     {

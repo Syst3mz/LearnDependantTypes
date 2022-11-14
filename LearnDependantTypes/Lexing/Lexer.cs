@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LearnDependantTypes
+namespace LearnDependantTypes.Lexing
 {
     public class Lexer
     {
