@@ -201,6 +201,7 @@ namespace LearnDependantTypes
     {
         public IAstExpr Callee;
         public List<IAstExpr> Arguments;
+        
         public Location Location { get; set; }
 
         public FuncCall(IAstExpr callee, List<IAstExpr> arguments, Location location)
